@@ -1,4 +1,4 @@
-# xapp-proxy-for-xumm-api
+# xApp Proxy for XUMM API
 This repository is used to act as a bridge between an xAPP and the XUMM API
 
 ## Installation
