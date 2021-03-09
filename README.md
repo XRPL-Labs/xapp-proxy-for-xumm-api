@@ -12,4 +12,5 @@ Include a .env file with the following data:
 PORT=3000
 API_KEY=7b36xxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 API_SECRET=e8b7xxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+XAPP_SECRET=...
 ```
