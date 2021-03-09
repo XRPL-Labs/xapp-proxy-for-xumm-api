@@ -6,6 +6,9 @@ const cors = require('cors')
 const helmet = require("helmet")
 const morgan = require('morgan')
 
+const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+
 const app = express()
 
 app.use(bodyParser.json())
@@ -14,9 +17,26 @@ app.use(morgan('tiny'))
 app.use(cors())
 
 axios.defaults.baseURL = 'https://xumm.app/api/v1/platform'
-axios.defaults.headers.common['X-API-Key'] = process.env.API_KEY
-axios.defaults.headers.common['X-API-Secret'] = process.env.API_SECRET
+axios.defaults.headers.common['X-API-Key'] = process.env.XUMM_APIKEY
+axios.defaults.headers.common['X-API-Secret'] = process.env.XUMM_APISECRET
 axios.defaults.headers.post['Content-Type'] = 'application/json'
+
+const authorize = (req, res, next) => {
+    // const token = req.body.ott
+    // const date = req.body.ots
+    // const hash = crypto.createHash('sha256').update(token + process.env.XAPP_SECRET + date).digest('hex')
+    // if (crypto.timingSafeEqual(a, b)) next()
+    console.log(req.headers)
+    try {
+        const decoded = jwt.verify(req.header('Authorization'), process.env.XAPP_SECRET)
+        next()
+    } catch(e) {
+        res.status(403).json({
+            msg: 'invalid token',
+            error: e
+        })
+    }
+}
 
 app.get('/xapp/ott/:token', async (req, res) => {
     const token = req.params.token
@@ -28,6 +48,15 @@ app.get('/xapp/ott/:token', async (req, res) => {
 
     try {
         const response = await axios.get(`/xapp/ott/${token}`)
+
+        // const date = new Date
+        // const hash = crypto.createHash('sha256').update(token + process.env.XAPP_SECRET + date).digest('hex')
+        // response.data['ott'] = token
+        // response.data['hash'] = hash
+        // response.data['ots'] = date
+
+        const authToken = jwt.sign({}, process.env.XAPP_SECRET)
+        response.data['token'] = authToken
         console.log(response.data)
         res.json(response.data)
     } catch(e) {
@@ -39,7 +68,7 @@ app.get('/xapp/ott/:token', async (req, res) => {
 
 })
 
-app.post('/payload', async (req, res) => {
+app.post('/payload', authorize, async (req, res) => {
     try {
         const response = await axios.post('/payload', req.body)
         console.log(response.data)
@@ -52,7 +81,7 @@ app.post('/payload', async (req, res) => {
     }
 })
 
-app.get('/payload/:payload_uuid', async (req, res) => {
+app.get('/payload/:payload_uuid', authorize, async (req, res) => {
     const uuid = req.params.payload_uuid
 
     if (typeof uuid === undefined) {
