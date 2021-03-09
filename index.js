@@ -43,7 +43,10 @@ app.get('/xapp/ott/:token', async (req, res) => {
 
     if (typeof token === undefined) {
         console.log('No token given respond 400')
-        return res.status(400)
+        return res.status(400).json({
+            msg: 'Token undefined',
+            error: true
+        })
     }
 
     try {
@@ -55,14 +58,15 @@ app.get('/xapp/ott/:token', async (req, res) => {
         // response.data['hash'] = hash
         // response.data['ots'] = date
 
-        const authToken = jwt.sign({}, process.env.XAPP_SECRET)
+        const authToken = jwt.sign({ ott: token}, process.env.XAPP_SECRET)
         response.data['token'] = authToken
         console.log(response.data)
         res.json(response.data)
     } catch(e) {
         console.log(e)
         res.status(400).json({
-            msg: e
+            msg: e,
+            error: true
         })
     }
 
@@ -76,7 +80,8 @@ app.post('/payload', authorize, async (req, res) => {
     } catch(e) {
         console.log(e)
         res.status(400).json({
-            msg: e
+            msg: e,
+            error: true
         })
     }
 })
@@ -86,7 +91,10 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
 
     if (typeof uuid === undefined) {
         console.log('No token given respond 400')
-        return res.status(400)
+        return res.status(400).json({
+            msg: 'Token undefined',
+            error: true
+        })
     }
 
     try {
@@ -96,7 +104,8 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
     } catch(e) {
         console.log(e)
         res.status(400).json({
-            msg: e
+            msg: e,
+            error: true
         })
     }
 })
