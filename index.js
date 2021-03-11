@@ -5,9 +5,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const helmet = require("helmet")
 const morgan = require('morgan')
-
 const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
 
 const app = express()
 
@@ -22,11 +20,6 @@ axios.defaults.headers.common['X-API-Secret'] = process.env.XUMM_APISECRET
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
 const authorize = (req, res, next) => {
-    // const token = req.body.ott
-    // const date = req.body.ots
-    // const hash = crypto.createHash('sha256').update(token + process.env.XAPP_SECRET + date).digest('hex')
-    // if (crypto.timingSafeEqual(a, b)) next()
-    console.log(req.headers)
     try {
         const decoded = jwt.verify(req.header('Authorization'), process.env.XAPP_SECRET)
         next()
@@ -52,13 +45,7 @@ app.get('/xapp/ott/:token', async (req, res) => {
     try {
         const response = await axios.get(`/xapp/ott/${token}`)
 
-        // const date = new Date
-        // const hash = crypto.createHash('sha256').update(token + process.env.XAPP_SECRET + date).digest('hex')
-        // response.data['ott'] = token
-        // response.data['hash'] = hash
-        // response.data['ots'] = date
-
-        const authToken = jwt.sign({ ott: token}, process.env.XAPP_SECRET)
+        const authToken = jwt.sign({ ott: token}, process.env.XAPP_SECRET, { expiresIn: '15m' })
         response.data['token'] = authToken
         console.log(response.data)
         res.json(response.data)
