@@ -12,7 +12,12 @@ const app = express()
 app.use(bodyParser.json())
 app.use(helmet())
 app.use(morgan('tiny'))
-app.use(cors())
+
+const corsOptions = {
+    origin: ['http://localhost:8080', '*', 'https://xapp.loca.lt', 'http://127.0.0.1:8080'],
+    // methods: 'GET, POST, OPTIONS'
+}
+app.use(cors(corsOptions))
 
 axios.defaults.baseURL = 'https://xumm.app/api/v1/platform'
 axios.defaults.headers.common['X-API-Key'] = process.env.XUMM_APIKEY
@@ -31,6 +36,21 @@ const authorize = (req, res, next) => {
     }
 }
 
+
+// Todo set authorize middleware!!!
+app.get('/curated-assets', async (req, res) => {
+    try {
+        const response = await axios.get('/curated-assets')
+        res.json(response.data)
+    } catch(e) {
+        console.log(e)
+        res.status(400).json({
+            msg: e,
+            error: true
+        })
+    }
+})
+
 app.get('/xapp/ott/:token', async (req, res) => {
     const token = req.params.token
 
@@ -44,7 +64,6 @@ app.get('/xapp/ott/:token', async (req, res) => {
 
     try {
         const response = await axios.get(`/xapp/ott/${token}`)
-
         const authToken = jwt.sign({ ott: token}, process.env.XAPP_SECRET, { expiresIn: '15m' })
         response.data['token'] = authToken
         console.log(response.data)
