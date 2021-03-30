@@ -4,7 +4,8 @@
   "description": "Backend server for API calls to the XUMM api",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node ./"
   },
   "author": "K. Paas",
   "license": "ISC",
