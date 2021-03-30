@@ -7,6 +7,7 @@ const helmet = require("helmet")
 const morgan = require('morgan')
 const jwt = require('jsonwebtoken')
 
+const PORT = process.env.PORT || 3000
 const app = express()
 
 app.use(bodyParser.json())
