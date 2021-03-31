@@ -61,7 +61,7 @@ app.get('/curated-assets', async (req, res) => {
 app.get('/xapp/ott/:token', async (req, res) => {
   const token = req.params.token
   
-  if (typeof token === undefined) {
+  if (typeof token !== 'string') {
     log('No token given respond 400')
     return res.status(400).json({
       msg: 'Token undefined',
