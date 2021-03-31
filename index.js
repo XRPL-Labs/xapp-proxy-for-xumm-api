@@ -18,6 +18,8 @@ app.use(bodyParser.json())
 app.use(helmet())
 app.use(morganDebug('xapp-backend:httplog', 'combined'))
 
+const uuidv4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+
 const corsOptions = {
   origin: ['http://localhost:8080', '*', 'https://xapp.loca.lt', 'http://127.0.0.1:8080'],
   // methods: 'GET, POST, OPTIONS'
@@ -63,6 +65,14 @@ app.get('/xapp/ott/:token', async (req, res) => {
     log('No token given respond 400')
     return res.status(400).json({
       msg: 'Token undefined',
+      error: true
+    })
+  }
+
+  if (!uuidv4.test(token)) {
+    log('No token given respond 401')
+    return res.status(401).json({
+      msg: 'Invalid token format',
       error: true
     })
   }
