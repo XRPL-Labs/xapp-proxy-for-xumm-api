@@ -50,7 +50,7 @@ app.get('/curated-assets', async (req, res) => {
     const response = await axios.get('/curated-assets')
     res.json(response.data)
   } catch(e) {
-    log(e)
+    log(`XUMM API error @ curated assets: ${e.message}`)
     res.status(400).json({
       msg: e,
       error: true
@@ -84,7 +84,7 @@ app.get('/xapp/ott/:token', async (req, res) => {
     log(response.data)
     res.json(response.data)
   } catch(e) {
-    log(e)
+    log(`XUMM API error @ ott fetch: ${e.message}`)
     res.status(400).json({
       msg: e,
       error: true
@@ -99,7 +99,7 @@ app.post('/payload', authorize, async (req, res) => {
     log(response.data)
     res.json(response.data)
   } catch(e) {
-    log(e)
+    log(`XUMM API error @ payload post: ${e.message}`)
     res.status(400).json({
       msg: e,
       error: true
@@ -123,7 +123,7 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
     log(response.data)
     res.json(response.data)
   } catch(e) {
-    log(e)
+    log(`XUMM API error @ payload get: ${e.message}`)
     res.status(400).json({
       msg: e,
       error: true
