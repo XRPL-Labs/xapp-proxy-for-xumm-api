@@ -27,15 +27,64 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 axios.defaults.baseURL = 'https://xumm.app/api/v1/platform'
-axios.defaults.headers.common['X-API-Key'] = process.env.XUMM_APIKEY
-axios.defaults.headers.common['X-API-Secret'] = process.env.XUMM_APISECRET
 axios.defaults.headers.post['Content-Type'] = 'application/json'
+
+const reqApiKeyMatch = (req, res, next) => {
+  const reqApiKey = req.header('x-api-key')
+
+  log(` --- reqApiKey: ${reqApiKey}`)
+  if (typeof reqApiKey === 'string' && uuidv4.test(reqApiKey.trim())) {
+    const envKey = 'XAPP_' + reqApiKey.trim().replace(/-/g, '_')
+    if (Object.keys(process.env).indexOf(envKey) > -1) {
+      // Attach prepared axios headers on this specific req.
+      Object.assign(req, {
+        xummAuthHeaders: {
+          headers: {
+            'X-API-Key': reqApiKey.trim(),
+            'X-API-Secret': process.env[envKey]
+          }
+        }
+      })
+
+      return next()
+    }
+  }
+
+  log('Invalid or missing req API key header')
+  res.status(403).json({
+    msg: 'Preflight error, missing API key header or invalid',
+    error: true
+  })
+}
 
 const authorize = (req, res, next) => {
   try {
     const decodedJwt = jwt.verify(req.header('Authorization'), process.env.XAPP_SECRET)
-    log({decodedJwt})
-    next()
+    const reqApiKey = decodedJwt?.app
+
+    if (typeof reqApiKey === 'string' && uuidv4.test(reqApiKey.trim())) {
+      const envKey = 'XAPP_' + reqApiKey.trim().replace(/-/g, '_')
+      if (Object.keys(process.env).indexOf(envKey) > -1) {
+        // Attach prepared axios headers on this specific req.
+        Object.assign(req, {
+          xummAuthHeaders: {
+            headers: {
+              'X-API-Key': reqApiKey.trim(),
+              'X-API-Secret': process.env[envKey]
+            }
+          }
+        })
+
+        // `return` to skip the error response, no code after here
+        return next()
+      }
+    }
+
+    log('Invalid or missing req API key in JWT')
+    res.status(403).json({
+      msg: 'JWT missing valid API Key',
+      error: e
+    })    
   } catch(e) {
     res.status(403).json({
       msg: 'invalid token',
@@ -44,10 +93,9 @@ const authorize = (req, res, next) => {
   }
 }
 
-// Todo set authorize middleware!!!
-app.get('/curated-assets', async (req, res) => {
+app.get('/curated-assets', authorize, async (req, res) => {
   try {
-    const response = await axios.get('/curated-assets')
+    const response = await axios.get('/curated-assets', req.xummAuthHeaders)
     res.json(response.data)
   } catch(e) {
     log(`XUMM API error @ curated assets: ${e.message}`)
@@ -58,7 +106,7 @@ app.get('/curated-assets', async (req, res) => {
   }
 })
 
-app.get('/xapp/ott/:token', async (req, res) => {
+app.get('/xapp/ott/:token', reqApiKeyMatch, async (req, res) => {
   const token = req.params.token
   
   if (typeof token !== 'string') {
@@ -78,9 +126,13 @@ app.get('/xapp/ott/:token', async (req, res) => {
   }
   
   try {
-    const response = await axios.get(`/xapp/ott/${token}`)
-    const authToken = jwt.sign({ ott: token}, process.env.XAPP_SECRET, { expiresIn: '15m' })
+    const response = await axios.get(`/xapp/ott/${token}`, req.xummAuthHeaders)
+    const authToken = jwt.sign({
+      ott: token,
+      app: req.xummAuthHeaders.headers['X-API-Key']
+    }, process.env.XAPP_SECRET, { expiresIn: '4h' })
     response.data['token'] = authToken
+
     log(response.data)
     res.json(response.data)
   } catch(e) {
@@ -95,7 +147,7 @@ app.get('/xapp/ott/:token', async (req, res) => {
 
 app.post('/payload', authorize, async (req, res) => {
   try {
-    const response = await axios.post('/payload', req.body)
+    const response = await axios.post('/payload', req.body, req.xummAuthHeaders)
     log(response.data)
     res.json(response.data)
   } catch(e) {
@@ -119,7 +171,7 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
   }
   
   try {
-    const response = await axios.get(`/payload/${uuid}`)
+    const response = await axios.get(`/payload/${uuid}`, req.xummAuthHeaders)
     log(response.data)
     res.json(response.data)
   } catch(e) {
