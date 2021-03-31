@@ -31,7 +31,8 @@ axios.defaults.headers.post['Content-Type'] = 'application/json'
 
 const authorize = (req, res, next) => {
   try {
-    const decoded = jwt.verify(req.header('Authorization'), process.env.XAPP_SECRET)
+    const decodedJwt = jwt.verify(req.header('Authorization'), process.env.XAPP_SECRET)
+    log({decodedJwt})
     next()
   } catch(e) {
     res.status(403).json({
