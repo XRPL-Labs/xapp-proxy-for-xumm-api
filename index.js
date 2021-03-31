@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const helmet = require("helmet")
 const morgan = require('morgan')
+const morganDebug = require('morgan-debug')
 const jwt = require('jsonwebtoken')
 
 const PORT = process.env.PORT || 3000
@@ -15,7 +16,7 @@ log.log = console.log.bind(console)
 
 app.use(bodyParser.json())
 app.use(helmet())
-app.use(morgan('tiny'))
+app.use(morganDebug('xapp-backend:httplog', 'combined'))
 
 const corsOptions = {
   origin: ['http://localhost:8080', '*', 'https://xapp.loca.lt', 'http://127.0.0.1:8080'],
