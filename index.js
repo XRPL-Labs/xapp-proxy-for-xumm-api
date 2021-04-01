@@ -1,4 +1,5 @@
 require('dotenv').config()
+require('dotenv').config({path: __dirname})
 const log = require('debug')('xapp-backend')
 const { default: axios } = require('axios')
 const express = require("express")
