@@ -22,6 +22,21 @@ to see log output:
 DEBUG=xapp* node index.js
 ```
 
+## Running in production
+
+See `pm2.config.js` for params;
+
+To run / reload:
+
+```
+npm run pm2
+```
+
+###### PM2 101:
+- List processes: `./node_modules/pm2/bin/pm2 list`
+- Monitor processes: `./node_modules/pm2/bin/pm2 monit`
+- Logs & live log: `./node_modules/pm2/bin/pm2 logs`
+
 ### .env setup
 Include a `.env` (or `.env.local`) file with the following data (see: `.env.sample`): 
 ```

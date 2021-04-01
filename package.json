@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "DEBUG=xapp* node ./",
-    "dev": "DEBUG=xapp* nodemon ./"
+    "dev": "DEBUG=xapp* nodemon ./",
+    "pm2": "DEBUG=xapp:* pm2 reload pm2.config.js",
+    "logs": "pm2 logs"
   },
   "author": "K. Paas",
   "license": "ISC",
@@ -23,7 +25,8 @@
     "morgan-debug": "^2.0.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "pm2": "^4.5.5"
   },
   "nodemonConfig": {
     "ignore": [
