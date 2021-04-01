@@ -182,6 +182,14 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
   }
 })
 
+
+app.get('*', async (req, res) => {
+  res.status(404).json({
+    msg: 'Not found, see XUMM API Docs @ https://xumm.readme.io',
+    error: true
+  })
+})
+
 app.listen(PORT, () => {
   require('dns').lookup(require('os').hostname(), function (err, add, fam) {
     log(`App listening at http://${add}:${PORT}`)
