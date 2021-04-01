@@ -1,4 +1,3 @@
-require('dotenv').config()
 require('dotenv').config({path: __dirname})
 const log = require('debug')('xapp-backend')
 const { default: axios } = require('axios')
@@ -6,7 +5,6 @@ const express = require("express")
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const helmet = require("helmet")
-const morgan = require('morgan')
 const morganDebug = require('morgan-debug')
 const jwt = require('jsonwebtoken')
 
