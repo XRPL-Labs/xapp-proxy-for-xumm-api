@@ -1,5 +1,17 @@
 # xApp Proxy for XUMM API
-This repository is used to act as a bridge between an xAPP and the XUMM API
+
+This repository is used to act as a bridge between an xAPP and the XUMM API, as you need your own backend for your SPA/frontend app to interact with the XUMM API. To use this proxy service, your application needs to send a specific header to resolve the XUMM xApp OTT:
+
+```
+const xummApiKey = 'the-public-API-key-received-from-the-xumm-dev-dashboard'
+
+const urlParams = new URLSearchParams(window.location.search)
+const oneTimeToken = urlParams.get('xAppToken') || ''
+
+const ottEndpoint = `https://wherever-this-repo-is-running.com/xapp/ott/${oneTimeToken}`
+
+const res = await axios(ottEndpoint, { headers: { 'x-api-key': xummApiKey } })
+```
 
 ## Installation
 Install dependencies with npm
