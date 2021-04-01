@@ -44,6 +44,44 @@ To run / reload:
 npm run pm2
 ```
 
+Don't expose this service publicly, put a reverse proxy like nginx in front of the application, with a config like:
+
+```
+upstream @xappproxy {
+    server 127.0.0.1:4000;
+}
+
+server {
+  listen 443 ssl default_server;
+  listen [::]:443 ssl default_server;
+
+  include snippets/snakeoil.conf;
+  root /var/www/;
+  index index.html;
+  server_name _;
+
+  location / {
+    if ($request_method = 'OPTIONS') {
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,X-API-Key,Authorization';
+      add_header 'Access-Control-Max-Age' 1728000;
+      add_header 'Content-Type' 'text/plain; charset=utf-8';
+      add_header 'Content-Length' 0;
+      return 204;
+    }
+
+    more_set_headers 'X-Notice: xumm.app';
+    more_set_headers 'Access-Control-Allow-Origin: *';
+
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+
+    proxy_pass http://@xappproxy;
+  }
+}
+```
+
 ###### PM2 101:
 - List processes: `./node_modules/pm2/bin/pm2 list`
 - Monitor processes: `./node_modules/pm2/bin/pm2 monit`
