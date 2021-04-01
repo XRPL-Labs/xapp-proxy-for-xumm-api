@@ -82,12 +82,12 @@ const authorize = (req, res, next) => {
     log('Invalid or missing req API key in JWT')
     res.status(403).json({
       msg: 'JWT missing valid API Key',
-      error: e
+      error: e.message
     })    
   } catch(e) {
     res.status(403).json({
       msg: 'invalid token',
-      error: e
+      error: e.message
     })
   }
 }
@@ -99,7 +99,7 @@ app.get('/curated-assets', authorize, async (req, res) => {
   } catch(e) {
     log(`XUMM API error @ curated assets: ${e.message}`)
     res.status(400).json({
-      msg: e,
+      msg: e.message,
       error: true
     })
   }
@@ -111,7 +111,7 @@ app.get('/xapp/ott/:token', reqApiKeyMatch, async (req, res) => {
   if (typeof token !== 'string') {
     log('No token given respond 400')
     return res.status(400).json({
-      msg: 'Token undefined',
+      msg: 'Token undefined / invalid',
       error: true
     })
   }
@@ -137,7 +137,7 @@ app.get('/xapp/ott/:token', reqApiKeyMatch, async (req, res) => {
   } catch(e) {
     log(`XUMM API error @ ott fetch: ${e.message}`)
     res.status(400).json({
-      msg: e,
+      msg: e.message,
       error: true
     })
   }
@@ -152,7 +152,7 @@ app.post('/payload', authorize, async (req, res) => {
   } catch(e) {
     log(`XUMM API error @ payload post: ${e.message}`)
     res.status(400).json({
-      msg: e,
+      msg: e.message,
       error: true
     })
   }
@@ -176,7 +176,7 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
   } catch(e) {
     log(`XUMM API error @ payload get: ${e.message}`)
     res.status(400).json({
-      msg: e,
+      msg: e.message,
       error: true
     })
   }
