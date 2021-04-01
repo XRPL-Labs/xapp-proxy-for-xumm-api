@@ -186,6 +186,15 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
 app.listen(PORT, () => {
   require('dns').lookup(require('os').hostname(), function (err, add, fam) {
     log(`App listening at http://${add}:${PORT}`)
-    log(`And http://localhost:${PORT}`)
+    log(`              +  http://localhost:${PORT}`)
+    log('Environment:', Object.keys(process.env).filter(k => k.match(/^XAPP|PORT/)).reduce((a, b) => {
+      const v = b.match(/secret|^XAPP_[0-9a-f]{8}_[0-9a-f]{4}/i)
+        ? process.env[b].replace(/./g, '*')
+        : process.env[b]
+      Object.assign(a, {
+        [b]: v
+      })
+      return a
+    }, {}))
   })
 })
