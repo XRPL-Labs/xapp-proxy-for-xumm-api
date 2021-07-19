@@ -182,6 +182,28 @@ app.get('/payload/:payload_uuid', authorize, async (req, res) => {
   }
 })
 
+app.get('/rates/:currency', authorize, async (req, res) => {
+  const currency = req.params.currency
+  
+  if (typeof currency === undefined) {
+    log('No currency given respond 400')
+    return res.status(400).json({
+      msg: 'Currency undefined',
+      error: true
+    })
+  }
+
+  try {
+    const response = await axios.get(`/rates/${currency}`, req.xummAuthHeaders)
+    res.json(response.data)
+  } catch {
+    log(`XUMM API error @ rates got: ${e.message}`)
+    res.status(400).json({
+      msg: e,
+      error: true
+    })
+  }
+})
 
 app.get('*', async (req, res) => {
   res.status(404).json({
