@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  XAPP Proxy - https://github.com/XRPL-Labs/xapp-proxy-for-xumm-api wrapped with serverless-express
+  
+Parameters:
+  XUMMApiToken:
+    Type: String
+    Description: The registered XUMM API Token
+
+  XUMMApiSecret:
+    Type: String
+    Description: The registered XUMM API Secret
+    NoEcho: true
+
+Resources:
+  XAPPProxyHTTP:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: XAPPProxyHTTP
+      ProtocolType: HTTP
+      Target:
+        Fn::Sub:
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${XAPPProxyFunction.Arn}/invocations
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+        AllowOrigins:
+          - "*"
+          # - !Ref WSTokenTrashRecordSetAlias
+          # - !Join
+          #   - ""
+          #   -
+          #     - "wss://"
+          #     - !Ref WSTokenTrashRecordSetAlias
+          # - !Join
+          #   - ""
+          #   -
+          #     - "https://"
+          #     - !Ref TokenTrashRecordSetAlias
+  XAPPProxyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      # CodeUri: xumm-callback/
+      # Handler: app.handler
+      # MemorySize: 128
+      # Runtime: python3.8
+      CodeUri: proxy/
+      Handler: lambda.handler
+      MemorySize: 128
+      Runtime: nodejs14.x
+  XUMMCallbackPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - XAPPProxyHTTP
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref XAPPProxyFunction
+      Principal: apigateway.amazonaws.com
+
+
+Outputs:
+  # HTTPSURI:
+  #   Description: "The HTTPS URI to connect to"
+  #   Value: !GetAtt TokenTrashHTTP.ApiEndpoint
+  HTTPSCallbackURI:
+    Description: "The HTTPS URI for the XUMM backend to connect to"
+    Value: !GetAtt XAPPProxyHTTP.ApiEndpoint
