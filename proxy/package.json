@@ -13,6 +13,7 @@
   "author": "K. Paas",
   "license": "ISC",
   "dependencies": {
+    "@vendia/serverless-express": "^4.3.11",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
