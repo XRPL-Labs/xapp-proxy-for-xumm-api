@@ -1,4 +1,7 @@
-# xApp Proxy for XUMM API
+# Proxy for xApps consuming the XUMM API
+
+#### Please note: xApps (public or sandbox) need to be whitelisted first by [XRPL Labs](https://xrpl-labs.com). The XUMM API/SDK is open an can be used by anyone at any time, but xApps need explicit whitelisting.
+![image](https://user-images.githubusercontent.com/4756161/132087605-44857e28-61cf-4e7a-812f-d205e888bef7.png)
 
 This repository is used to act as a bridge between an xAPP and the XUMM API, as you need your own backend for your SPA/frontend app to interact with the XUMM API. To use this proxy service, your application needs to send a specific header to resolve the XUMM xApp OTT:
 
