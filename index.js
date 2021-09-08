@@ -19,11 +19,10 @@ app.use(morganDebug('xapp-backend:httplog', 'combined'))
 
 const uuidv4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
 
-const corsOptions = {
-  origin: ['http://localhost:8080', '*', 'https://xapp.loca.lt', 'http://127.0.0.1:8080'],
+app.use(cors({
+  origin: (process.env?.CORS_ORIGINS || '').replace(/ +/g, ',').split(','),
   // methods: 'GET, POST, OPTIONS'
-}
-app.use(cors(corsOptions))
+}))
 
 axios.defaults.baseURL = 'https://xumm.app/api/v1/platform'
 axios.defaults.headers.post['Content-Type'] = 'application/json'
