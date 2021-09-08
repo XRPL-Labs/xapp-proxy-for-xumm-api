@@ -142,7 +142,7 @@ app.get('/xapp/ott/:token', reqApiKeyMatch, async (req, res) => {
   try {
     let url = `/xapp/ott/${token}`
 
-    if (typeof process.env.DEVELOPMENT_MODE_DEVICE_ID !== 'undefined') {
+    if (typeof process.env.DEVELOPMENT_MODE_DEVICE_ID !== 'undefined' && String(process.env.DEVELOPMENT_MODE || '').toUpperCase() === 'TRUE') {
       log('!! Signing hash for re-fetching OTT for device ID', process.env.DEVELOPMENT_MODE_DEVICE_ID)
       const data = `${token}.${req.xummAuthHeaders.headers['X-API-Secret']}.${process.env.DEVELOPMENT_MODE_DEVICE_ID}`
 
