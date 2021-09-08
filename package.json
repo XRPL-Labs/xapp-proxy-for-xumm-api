@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "DEBUG=xapp* node ./",
-    "dev": "DEBUG=xapp* nodemon ./",
+    "serve": "DEBUG=xapp* node .",
+    "dev": "DEBUG=xapp* node dev",
     "pm2": "DEBUG=xapp:* pm2 reload pm2.config.js",
     "logs": "pm2 logs"
   },
@@ -25,7 +25,8 @@
     "morgan-debug": "^2.0.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7",
+    "ngrok": "^4.2.2",
+    "nodemon": "^2.0.12",
     "pm2": "^5.1.1"
   },
   "nodemonConfig": {
@@ -33,6 +34,6 @@
       "test/*",
       "node_modules/*"
     ],
-    "ext": "ts,js,json,html"
+    "ext": "ts,js,json,html,.env"
   }
 }

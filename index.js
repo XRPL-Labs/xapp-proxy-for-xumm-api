@@ -7,6 +7,7 @@ const cors = require('cors')
 const helmet = require("helmet")
 const morganDebug = require('morgan-debug')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 
 const PORT = process.env.PORT || 3000
 const app = express()
@@ -24,8 +25,23 @@ app.use(cors({
   // methods: 'GET, POST, OPTIONS'
 }))
 
+/**
+ * Available endpoints (proxied)
+ *    Setup:
+ *      GET
+ *        /xapp/ott/:token
+ *    JWT:
+ *      GET
+ *        /curated-assets
+ *        /rates/:currency
+ *        /payload/:payload_uuid
+ *      POST
+ *        /payload
+ */
+
 axios.defaults.baseURL = 'https://xumm.app/api/v1/platform'
-axios.defaults.headers.post['Content-Type'] = 'application/json'
+axios.defaults.headers.common['Content-Type'] = 'application/json'
+axios.defaults.headers.common['User-Agent'] = 'XUMM xApp Proxy 2.0.0'
 
 const reqApiKeyMatch = (req, res, next) => {
   const reqApiKey = req.header('x-api-key')
@@ -57,7 +73,7 @@ const reqApiKeyMatch = (req, res, next) => {
 
 const authorize = (req, res, next) => {
   try {
-    const decodedJwt = jwt.verify(req.header('Authorization'), process.env.XAPP_SECRET)
+    const decodedJwt = jwt.verify((req.header('Authorization') || '').replace(/^Bearer[: ]*/, ''), process.env.XAPP_SECRET)
     const reqApiKey = decodedJwt?.app
 
     if (typeof reqApiKey === 'string' && uuidv4.test(reqApiKey.trim())) {
@@ -124,7 +140,21 @@ app.get('/xapp/ott/:token', reqApiKeyMatch, async (req, res) => {
   }
   
   try {
-    const response = await axios.get(`/xapp/ott/${token}`, req.xummAuthHeaders)
+    let url = `/xapp/ott/${token}`
+
+    if (typeof process.env.DEVELOPMENT_MODE_DEVICE_ID !== 'undefined') {
+      log('!! Signing hash for re-fetching OTT for device ID', process.env.DEVELOPMENT_MODE_DEVICE_ID)
+      const data = `${token}.${req.xummAuthHeaders.headers['X-API-Secret']}.${process.env.DEVELOPMENT_MODE_DEVICE_ID}`
+
+      const hash = crypto
+        .createHash('sha1')
+        .update(data.toUpperCase())
+        .digest('hex')
+
+        url += `/${hash}`
+    }
+
+    const response = await axios.get(url, req.xummAuthHeaders)
     const authToken = jwt.sign({
       ott: token,
       app: req.xummAuthHeaders.headers['X-API-Key']
@@ -212,10 +242,14 @@ app.get('*', async (req, res) => {
 })
 
 app.listen(PORT, () => {
-  require('dns').lookup(require('os').hostname(), function (err, add, fam) {
-    log(`App listening at http://${add}:${PORT}`)
-    log(`              +  http://localhost:${PORT}`)
-    log('Environment:', Object.keys(process.env).filter(k => k.match(/^XAPP|PORT/)).reduce((a, b) => {
+  require('dns').lookup(require('os').hostname(), async (err, add, fam) => {
+    log(`\nApp listening at http://${add}:${PORT}`)
+    log(`                 http://localhost:${PORT}`)
+    if (process.env.NGROK_URL) {
+      log(`\n              »  ${process.env.NGROK_URL}`)
+    }
+
+    log(`\nEnvironment:`, Object.keys(process.env).filter(k => k.match(/^XAPP|PORT/)).reduce((a, b) => {
       const v = b.match(/secret|^XAPP_[0-9a-f]{8}_[0-9a-f]{4}/i)
         ? process.env[b].replace(/./g, '*')
         : process.env[b]
